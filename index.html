@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flash Cleaner</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
+  </script>
+<body>
+  <div class="container">
+    <img src="icons/shield.svg" alt="Shield" class="icon" />
+
+    <h1>Flash Cleaner</h1>
+    <p class="subtitle">Ваше устройство может быть заражено. Нажмите для сканирования и оптимизации.</p>
+
+    <div class="status-cards">
+      <div class="card">
+        <h3>Загрузка CPU</h3>
+        <p id="cpu">45%</p>
+      </div>
+      <div class="card">
+        <h3>ОЗУ занято</h3>
+        <p id="ram">2.4 GB / 4 GB</p>
+      </div>
+      <div class="card">
+        <h3>Хранилище</h3>
+        <p id="storage">11.8 GB свободно</p>
+      </div>
+    </div>
+
+    <button id="scanBtn">Начать сканирование</button>
+
+    <div id="scanner" style="display:none;">
+      <p>Сканирование устройства...</p>
+      <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+      </div>
+    </div>
+
+    <div id="result" style="display:none;">
+      <h2>Обнаружено 5 угроз</h2>
+      <p>Рекомендуется немедленно устранить угрозы для безопасности устройства.</p>
+      <button id="confirmBtn">Очистить сейчас</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
